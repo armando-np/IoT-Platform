@@ -1,3 +1,4 @@
+import { AlertSeverity } from '@prisma/client';
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateAlertRuleDto } from './dto/create-alert-rule.dto';
@@ -11,6 +12,12 @@ export class AlertsService {
   }
 
   createRule(dto: CreateAlertRuleDto) {
-    return this.prisma.alertRule.create({ data: { ...dto, enabled: dto.enabled ?? true } });
+    return this.prisma.alertRule.create({
+      data: {
+        ...dto,
+        severity: dto.severity as AlertSeverity,
+        enabled: dto.enabled ?? true
+      }
+    });
   }
 }

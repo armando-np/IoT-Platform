@@ -1,3 +1,4 @@
+import { Prisma } from '@prisma/client';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -21,7 +22,7 @@ export class CommandsService {
         nodeId: node.id,
         userId,
         command: dto.command,
-        parameters: dto.parameters ?? {},
+        parameters: (dto.parameters ?? {}) as Prisma.InputJsonObject,
         status: 'PENDING',
         timeoutAt: new Date(Date.now() + 30000)
       }

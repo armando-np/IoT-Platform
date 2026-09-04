@@ -26,11 +26,11 @@ export class AuthService {
     const payload = { sub: user.id, email: user.email, roles };
     const accessToken = await this.jwt.signAsync(payload, {
       secret: process.env.JWT_ACCESS_SECRET,
-      expiresIn: process.env.JWT_ACCESS_TTL ?? '15m'
+      expiresIn: Number(process.env.JWT_ACCESS_EXPIRES_SECONDS ?? 900)
     });
     const refreshToken = await this.jwt.signAsync(payload, {
       secret: process.env.JWT_REFRESH_SECRET,
-      expiresIn: process.env.JWT_REFRESH_TTL ?? '7d'
+      expiresIn: Number(process.env.JWT_REFRESH_EXPIRES_SECONDS ?? 604800)
     });
     const refreshTokenHash = await bcrypt.hash(refreshToken, Number(process.env.BCRYPT_ROUNDS ?? 12));
     await this.prisma.user.update({ where: { id: user.id }, data: { refreshTokenHash, lastLoginAt: new Date() } });
@@ -54,7 +54,7 @@ export class AuthService {
     }
     const accessToken = await this.jwt.signAsync(
       { sub: payload.sub, email: payload.email, roles: payload.roles },
-      { secret: process.env.JWT_ACCESS_SECRET, expiresIn: process.env.JWT_ACCESS_TTL ?? '15m' }
+      { secret: process.env.JWT_ACCESS_SECRET, expiresIn: Number(process.env.JWT_ACCESS_EXPIRES_SECONDS ?? 900)}
     );
     return { accessToken };
   }

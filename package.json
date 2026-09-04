@@ -19,7 +19,9 @@
     "api:migrate": "npm run migration:run --workspace=@nexaiot/api",
     "api:seed": "npm run seed --workspace=@nexaiot/api",
     "web:dev": "npm run dev --workspace=@nexaiot/web",
-    "web:build": "npm run build --workspace=@nexaiot/web"
+    "web:build": "npm run build --workspace=@nexaiot/web",
+    "build:cloudflare": "npm run build --workspace=@nexaiot/shared && npm run build --workspace=@nexaiot/web",
+    "api:prisma:generate": "npm run prisma:generate --workspace=@nexaiot/api"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",

@@ -1,3 +1,4 @@
+import { Prisma } from '@prisma/client';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateSensorDto } from './dto/create-sensor.dto';
@@ -15,7 +16,14 @@ export class SensorsService {
   }
 
   create(dto: CreateSensorDto) {
-    return this.prisma.sensor.create({ data: { ...dto, status: 'ACTIVE' } });
+    const { metadata, ...sensorData } = dto;
+    return this.prisma.sensor.create({
+      data: {
+        ...sensorData,
+        metadata: (metadata ?? {}) as Prisma.InputJsonObject,
+        status: 'ACTIVE'
+      }
+    });
   }
 
   async get(id: string) {
