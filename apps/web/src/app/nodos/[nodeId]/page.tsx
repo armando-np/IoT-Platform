@@ -1,7 +1,7 @@
-import { AppShell } from '@/components/app-shell';
-import { DataPanel } from '@/components/data-panel';
-import { StatusBadge } from '@/components/status-badge';
-import { nodes, sensors, telemetrySeries } from '@/lib/demo-data';
+import { AppShell } from '../../../components/app-shell';
+import { DataPanel } from '../../../components/data-panel';
+import { StatusBadge } from '../../../components/status-badge';
+import { nodes, sensors, telemetrySeries } from '../../../lib/demo-data';
 
 export function generateStaticParams() {
   return nodes.map((node) => ({ nodeId: node.nodeId }));
@@ -10,6 +10,20 @@ export function generateStaticParams() {
 export default async function NodeDetailPage({ params }: { params: Promise<{ nodeId: string }> }) {
   const { nodeId } = await params;
   const node = nodes.find((item) => item.nodeId === nodeId) ?? nodes[0];
+
+  if (!node) {
+    return (
+      <AppShell
+        title="Nodo no encontrado"
+        subtitle="No hay nodos disponibles o el nodo solicitado no existe."
+      >
+        <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-6 text-sm text-slate-300">
+          No se encontró el nodo solicitado.
+        </div>
+      </AppShell>
+    );
+  }
+
   const nodeSensors = sensors.filter((sensor) => sensor.nodeId === node.nodeId);
   return (
     <AppShell title={node.nodeId} subtitle="Node detail, sensors, telemetry, events, logs, commands, and configuration.">

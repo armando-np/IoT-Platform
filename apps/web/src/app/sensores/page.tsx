@@ -1,7 +1,7 @@
-import { AppShell } from '@/components/app-shell';
-import { DataPanel } from '@/components/data-panel';
-import { StatusBadge } from '@/components/status-badge';
-import { sensors } from '@/lib/demo-data';
+import { AppShell } from '../../components/app-shell';
+import { DataPanel } from '../../components/data-panel';
+import { StatusBadge } from '../../components/status-badge';
+import { sensors } from '../../lib/demo-data';
 
 export default function SensorsPage() {
   return (

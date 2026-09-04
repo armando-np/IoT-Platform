@@ -1,3 +1,3 @@
-export * from './domain';
-export * from './mqtt';
-export * from './realtime-events';
+export * from './domain.js';
+export * from './mqtt.js';
+export * from './realtime-events.js';

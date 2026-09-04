@@ -1,6 +1,6 @@
-import { AppShell } from '@/components/app-shell';
-import { DataPanel } from '@/components/data-panel';
-import { NodeTable } from '@/components/node-table';
+import { AppShell } from '../../components/app-shell';
+import { DataPanel } from '../../components/data-panel';
+import { NodeTable } from '../../components/node-table';
 
 export default function NodesPage() {
   return (

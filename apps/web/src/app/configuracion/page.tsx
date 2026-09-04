@@ -1,6 +1,6 @@
-import { AppShell } from '@/components/app-shell';
-import { DataPanel } from '@/components/data-panel';
-import { appConfig } from '@/lib/config';
+import { AppShell } from '../../components/app-shell';
+import { DataPanel } from '../../components/data-panel';
+import { appConfig } from '../../lib/config';
 
 export default function SettingsPage() {
   return (

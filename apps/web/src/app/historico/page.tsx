@@ -1,6 +1,6 @@
-import { AppShell } from '@/components/app-shell';
-import { DataPanel } from '@/components/data-panel';
-import { TelemetryChart } from '@/components/telemetry-chart';
+import { AppShell } from '../../components/app-shell';
+import { DataPanel } from '../../components/data-panel';
+import { TelemetryChart } from '../../components/telemetry-chart';
 
 export default function HistoryPage() {
   return (

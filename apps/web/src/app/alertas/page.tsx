@@ -1,7 +1,7 @@
-import { AppShell } from '@/components/app-shell';
-import { DataPanel } from '@/components/data-panel';
-import { StatusBadge } from '@/components/status-badge';
-import { alerts } from '@/lib/demo-data';
+import { AppShell } from '../../components/app-shell';
+import { DataPanel } from '../../components/data-panel';
+import { StatusBadge } from '../../components/status-badge';
+import { alerts } from '../../lib/demo-data';
 
 export default function AlertsPage() {
   return (

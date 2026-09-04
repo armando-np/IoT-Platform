@@ -1,4 +1,4 @@
-import { telemetrySeries } from '@/lib/demo-data';
+import { telemetrySeries } from '../lib/demo-data';
 
 function points(values: number[], width: number, height: number) {
   const min = Math.min(...values);

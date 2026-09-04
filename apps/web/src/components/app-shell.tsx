@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { appConfig } from '@/lib/config';
+import { appConfig } from '../lib/config';
 
 const nav = [
   { href: '/', label: 'Dashboard' },

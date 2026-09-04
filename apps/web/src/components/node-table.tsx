@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
-import { nodes } from '@/lib/demo-data';
+import { nodes } from '../lib/demo-data';
 import { StatusBadge } from './status-badge';
 
 export function NodeTable() {

@@ -1,5 +1,5 @@
-import { AppShell } from '@/components/app-shell';
-import { DataPanel } from '@/components/data-panel';
+import { AppShell } from '../../components/app-shell';
+import { DataPanel } from '../../components/data-panel';
 
 export default function LoginPage() {
   return (

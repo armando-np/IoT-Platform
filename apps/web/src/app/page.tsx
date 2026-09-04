@@ -1,9 +1,9 @@
-import { AppShell } from '@/components/app-shell';
-import { DataPanel } from '@/components/data-panel';
-import { MetricCard } from '@/components/metric-card';
-import { StatusBadge } from '@/components/status-badge';
-import { TelemetryChart } from '@/components/telemetry-chart';
-import { alerts, events, metrics, nodes, sensors } from '@/lib/demo-data';
+import { AppShell } from '../components/app-shell';
+import { DataPanel } from '../components/data-panel';
+import { MetricCard } from '../components/metric-card';
+import { StatusBadge } from '../components/status-badge';
+import { TelemetryChart } from '../components/telemetry-chart';
+import { alerts, events, metrics, nodes, sensors } from '../lib/demo-data';
 
 export default function DashboardPage() {
   return (

@@ -1,5 +1,5 @@
 import clsx from 'clsx';
-import type { DashboardMetric } from '@/lib/demo-data';
+import type { DashboardMetric } from '../lib/demo-data';
 
 const tones = {
   neutral: 'from-sky-500/10 to-slate-900/40',
