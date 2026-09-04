@@ -1,16 +1,29 @@
 "use client";
 
-import { useMemo, useState } from 'react';
 import Link from 'next/link';
-import { nodes } from '../lib/demo-data';
+import { useEffect, useMemo, useState } from 'react';
+import { getFromApi } from '../lib/api-client';
+import { clearSession } from '../lib/auth';
+import type { ApiNode } from '../lib/api-types';
 import { StatusBadge } from './status-badge';
 
 export function NodeTable() {
   const [query, setQuery] = useState('');
   const [status, setStatus] = useState('ALL');
+  const [nodes, setNodes] = useState<ApiNode[]>([]);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    void getFromApi<ApiNode[]>('/nodes').then((result) => {
+      if (result.status === 401) { clearSession(); setError('Sesión expirada.'); return; }
+      if (result.data) setNodes(result.data);
+      else setError(result.error ?? 'No se pudieron cargar los nodos.');
+    });
+  }, []);
+
   const filtered = useMemo(() => {
     return nodes.filter((node) => {
-      const matchesQuery = [node.nodeId, node.name, node.site, node.area].join(' ').toLowerCase().includes(query.toLowerCase());
+      const matchesQuery = [node.nodeId, node.name, node.site?.name ?? '', node.area?.name ?? ''].join(' ').toLowerCase().includes(query.toLowerCase());
       const matchesStatus = status === 'ALL' || node.status === status;
       return matchesQuery && matchesStatus;
     });
@@ -20,6 +33,7 @@ export function NodeTable() {
     <div>
       <div className="mb-4 flex flex-col gap-3 md:flex-row">
         <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search nodes" className="w-full rounded-xl border border-slate-800 bg-slate-950/60 px-4 py-3 text-sm text-slate-100 outline-none focus:border-sky-400/50" />
+        {error ? <div className="rounded-xl border border-rose-400/20 bg-rose-400/10 px-4 py-3 text-sm text-rose-200">{error}</div> : null}
         <select value={status} onChange={(event) => setStatus(event.target.value)} className="rounded-xl border border-slate-800 bg-slate-950/60 px-4 py-3 text-sm text-slate-100 outline-none focus:border-sky-400/50">
           <option value="ALL">All statuses</option>
           <option value="ONLINE">Online</option>
@@ -46,11 +60,11 @@ export function NodeTable() {
                   <Link href={`/nodos/${node.nodeId}/`} className="font-medium text-sky-200 hover:text-sky-100">{node.nodeId}</Link>
                   <div className="text-xs text-slate-500">{node.name}</div>
                 </td>
-                <td className="px-4 py-4 text-slate-300">{node.site} / {node.area}</td>
+                <td className="px-4 py-4 text-slate-300">{node.site?.name ?? '-'} / {node.area?.name ?? '-'}</td>
                 <td className="px-4 py-4"><StatusBadge value={node.status} /></td>
-                <td className="px-4 py-4 text-slate-300">{node.firmware}</td>
-                <td className="px-4 py-4 text-slate-300">{node.sensors}</td>
-                <td className="px-4 py-4 text-slate-400">{node.lastSeen}</td>
+                <td className="px-4 py-4 text-slate-300">{node.firmwareVersion ?? '-'}</td>
+                <td className="px-4 py-4 text-slate-300">{node.sensors?.length ?? 0}</td>
+                <td className="px-4 py-4 text-slate-400">{node.lastSeenAt ? new Date(node.lastSeenAt).toLocaleString() : 'Sin datos'}</td>
               </tr>
             ))}
           </tbody>

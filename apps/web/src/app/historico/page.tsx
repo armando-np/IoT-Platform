@@ -11,7 +11,7 @@ export default function HistoryPage() {
             {['5m', '1h', '24h', '7d', '30d', 'custom'].map((range) => <button key={range} className="rounded-xl border border-slate-800 bg-slate-950/50 px-4 py-3 text-sm text-slate-300">{range}</button>)}
           </div>
         </DataPanel>
-        <TelemetryChart />
+        <TelemetryChart telemetry={[]}  />
       </div>
     </AppShell>
   );
