@@ -1,0 +1,43 @@
+{
+  "name": "nexaiot-platform",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Scalable IoT monitoring platform for MQTT and EMQX with Cloudflare Pages frontend.",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspaces --if-present",
+    "build": "npm run build --workspace=@nexaiot/shared && npm run build --workspace=@nexaiot/mqtt && npm run build --workspace=@nexaiot/config && npm run build --workspace=@nexaiot/validation && npm run build --workspace=@nexaiot/api && npm run build --workspace=@nexaiot/web",
+    "lint": "npm run lint --workspace=@nexaiot/shared && npm run lint --workspace=@nexaiot/mqtt && npm run lint --workspace=@nexaiot/config && npm run lint --workspace=@nexaiot/validation && npm run lint --workspace=@nexaiot/api && npm run lint --workspace=@nexaiot/web",
+    "typecheck": "npm run typecheck --workspace=@nexaiot/shared && npm run typecheck --workspace=@nexaiot/mqtt && npm run typecheck --workspace=@nexaiot/config && npm run typecheck --workspace=@nexaiot/validation && npm run typecheck --workspace=@nexaiot/api && npm run typecheck --workspace=@nexaiot/web",
+    "test": "npm run test --workspace=@nexaiot/shared && npm run test --workspace=@nexaiot/mqtt && npm run test --workspace=@nexaiot/config && npm run test --workspace=@nexaiot/validation && npm run test --workspace=@nexaiot/api && npm run test --workspace=@nexaiot/web",
+    "format": "prettier --write .",
+    "api:dev": "npm run dev --workspace=@nexaiot/api",
+    "api:build": "npm run build --workspace=@nexaiot/api",
+    "api:migrate": "npm run migration:run --workspace=@nexaiot/api",
+    "api:seed": "npm run seed --workspace=@nexaiot/api",
+    "web:dev": "npm run dev --workspace=@nexaiot/web",
+    "web:build": "npm run build --workspace=@nexaiot/web"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "@eslint/js": "^9.18.0",
+    "eslint": "^9.18.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.3.0",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.3",
+    "typescript-eslint": "^8.20.0"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx,json,md,css,yml,yaml}": [
+      "prettier --write"
+    ]
+  },
+  "engines": {
+    "node": ">=20.11.0",
+    "npm": ">=10.0.0"
+  }
+}

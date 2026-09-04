@@ -1,0 +1,451 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum NodeStatus {
+  ONLINE
+  OFFLINE
+  UNKNOWN
+  MAINTENANCE
+  DISABLED
+}
+
+enum SensorStatus {
+  ACTIVE
+  INACTIVE
+  FAULT
+  MAINTENANCE
+}
+
+enum AlertSeverity {
+  INFO
+  WARNING
+  CRITICAL
+}
+
+enum AlertStatus {
+  ACTIVE
+  RESOLVED
+  ACKNOWLEDGED
+}
+
+enum CommandStatus {
+  PENDING
+  SENT
+  ACKNOWLEDGED
+  FAILED
+  TIMEOUT
+}
+
+enum MqttDirection {
+  INBOUND
+  OUTBOUND
+}
+
+enum ReadingQuality {
+  GOOD
+  WARN
+  BAD
+}
+
+model User {
+  id               String    @id @default(uuid()) @db.Uuid
+  email            String    @unique
+  name             String
+  passwordHash     String?   @map("password_hash")
+  refreshTokenHash String?   @map("refresh_token_hash")
+  lastLoginAt      DateTime? @map("last_login_at") @db.Timestamptz(6)
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt        DateTime? @map("deleted_at") @db.Timestamptz(6)
+
+  userRoles UserRole[]
+  commands  Command[]
+  auditLogs AuditLog[]
+
+  @@map("users")
+}
+
+model Role {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String   @unique
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  userRoles       UserRole[]
+  rolePermissions RolePermission[]
+
+  @@map("roles")
+}
+
+model Permission {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String   @unique
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  rolePermissions RolePermission[]
+
+  @@map("permissions")
+}
+
+model UserRole {
+  userId String @map("user_id") @db.Uuid
+  roleId String @map("role_id") @db.Uuid
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@id([userId, roleId])
+  @@map("user_roles")
+}
+
+model RolePermission {
+  roleId       String @map("role_id") @db.Uuid
+  permissionId String @map("permission_id") @db.Uuid
+
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+  @@map("role_permissions")
+}
+
+model Site {
+  id          String   @id @default(uuid()) @db.Uuid
+  slug        String   @unique
+  name        String
+  description String?
+  metadata    Json     @default("{}")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  areas Area[]
+  nodes Node[]
+
+  @@map("sites")
+}
+
+model Area {
+  id          String   @id @default(uuid()) @db.Uuid
+  siteId      String   @map("site_id") @db.Uuid
+  slug        String
+  name        String
+  description String?
+  metadata    Json     @default("{}")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  site  Site   @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  nodes Node[]
+
+  @@unique([siteId, slug])
+  @@map("areas")
+}
+
+model Node {
+  id               String     @id @default(uuid()) @db.Uuid
+  nodeId           String     @unique @map("node_id")
+  name             String
+  description      String?
+  model            String?
+  manufacturer     String?
+  firmwareVersion  String?    @map("firmware_version")
+  hardwareRevision String?    @map("hardware_revision")
+  ipAddress        String?    @map("ip_address")
+  status           NodeStatus @default(UNKNOWN)
+  siteId           String     @map("site_id") @db.Uuid
+  areaId           String     @map("area_id") @db.Uuid
+  lastSeenAt       DateTime?  @map("last_seen_at") @db.Timestamptz(6)
+  metadata         Json       @default("{}")
+  createdAt        DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime   @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt        DateTime?  @map("deleted_at") @db.Timestamptz(6)
+
+  site        Site                @relation(fields: [siteId], references: [id])
+  area        Area                @relation(fields: [areaId], references: [id])
+  credentials NodeCredential[]
+  statusLog   NodeStatusHistory[]
+  sensors     Sensor[]
+  readings    SensorReading[]
+  alerts      Alert[]
+  commands    Command[]
+  events      DeviceEvent[]
+
+  @@index([status])
+  @@index([siteId, areaId])
+  @@index([lastSeenAt])
+  @@map("nodes")
+}
+
+model NodeCredential {
+  id             String    @id @default(uuid()) @db.Uuid
+  nodeId         String    @map("node_id") @db.Uuid
+  username       String    @unique
+  passwordHash   String    @map("password_hash")
+  clientId       String    @unique @map("client_id")
+  aclProfile     String    @map("acl_profile")
+  isActive       Boolean   @default(true) @map("is_active")
+  expiresAt      DateTime? @map("expires_at") @db.Timestamptz(6)
+  lastRotatedAt  DateTime? @map("last_rotated_at") @db.Timestamptz(6)
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  node Node @relation(fields: [nodeId], references: [id], onDelete: Cascade)
+
+  @@index([nodeId, isActive])
+  @@map("node_credentials")
+}
+
+model NodeStatusHistory {
+  id        String     @id @default(uuid()) @db.Uuid
+  nodeId    String     @map("node_id") @db.Uuid
+  status    NodeStatus
+  reason    String?
+  source    String
+  createdAt DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  node Node @relation(fields: [nodeId], references: [id], onDelete: Cascade)
+
+  @@index([nodeId, createdAt])
+  @@map("node_status")
+}
+
+model SensorType {
+  id            String   @id @default(uuid()) @db.Uuid
+  name          String   @unique
+  defaultUnit   String?  @map("default_unit")
+  valueSchema   Json     @default("{}") @map("value_schema")
+  description   String?
+  metadata      Json     @default("{}")
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  sensors Sensor[]
+
+  @@map("sensor_types")
+}
+
+model Sensor {
+  id                      String       @id @default(uuid()) @db.Uuid
+  sensorId                String       @unique @map("sensor_id")
+  nodeId                  String       @map("node_id") @db.Uuid
+  sensorTypeId            String       @map("sensor_type_id") @db.Uuid
+  name                    String
+  unit                    String
+  description             String?
+  location                String?
+  minValue                Float?       @map("min_value")
+  maxValue                Float?       @map("max_value")
+  precision               Float?
+  expectedIntervalSeconds Int?         @map("expected_interval_seconds")
+  status                  SensorStatus @default(ACTIVE)
+  metadata                Json         @default("{}")
+  config                  Json         @default("{}")
+  createdAt               DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt               DateTime     @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt               DateTime?    @map("deleted_at") @db.Timestamptz(6)
+
+  node       Node          @relation(fields: [nodeId], references: [id], onDelete: Cascade)
+  sensorType SensorType    @relation(fields: [sensorTypeId], references: [id])
+  readings   SensorReading[]
+  alertRules AlertRule[]
+  alerts     Alert[]
+
+  @@index([nodeId])
+  @@index([sensorTypeId])
+  @@index([status])
+  @@map("sensors")
+}
+
+model SensorReading {
+  id           String         @default(uuid()) @db.Uuid
+  time         DateTime       @db.Timestamptz(6)
+  nodeId       String         @map("node_id") @db.Uuid
+  sensorId     String         @map("sensor_id") @db.Uuid
+  valueNumber  Float?         @map("value_number")
+  valueText    String?        @map("value_text")
+  valueBoolean Boolean?       @map("value_boolean")
+  unit         String?
+  quality      ReadingQuality @default(GOOD)
+  metadata     Json           @default("{}")
+
+  node   Node   @relation(fields: [nodeId], references: [id], onDelete: Cascade)
+  sensor Sensor @relation(fields: [sensorId], references: [id], onDelete: Cascade)
+
+  @@id([time, id])
+  @@index([sensorId, time])
+  @@index([nodeId, time])
+  @@map("sensor_readings")
+}
+
+model MqttTopic {
+  id          String   @id @default(uuid()) @db.Uuid
+  pattern     String   @unique
+  description String?
+  retained    Boolean  @default(false)
+  qos          Int      @default(1)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@map("mqtt_topics")
+}
+
+model MqttMessage {
+  id         String        @default(uuid()) @db.Uuid
+  receivedAt DateTime      @default(now()) @map("received_at") @db.Timestamptz(6)
+  topic      String
+  direction  MqttDirection
+  qos        Int
+  payload    Json
+  clientId   String?       @map("client_id")
+  messageId  String?       @map("message_id")
+  error      String?
+
+  @@id([receivedAt, id])
+  @@index([topic, receivedAt])
+  @@index([messageId])
+  @@map("mqtt_messages")
+}
+
+model AlertRule {
+  id              String        @id @default(uuid()) @db.Uuid
+  name            String
+  sensorId        String        @map("sensor_id") @db.Uuid
+  operator        String
+  threshold       Float
+  durationSeconds Int           @default(0) @map("duration_seconds")
+  severity        AlertSeverity
+  enabled         Boolean       @default(true)
+  cooldownSeconds Int           @default(300) @map("cooldown_seconds")
+  createdAt       DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime      @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  sensor Sensor  @relation(fields: [sensorId], references: [id], onDelete: Cascade)
+  alerts Alert[]
+
+  @@index([sensorId, enabled])
+  @@map("alert_rules")
+}
+
+model Alert {
+  id             String        @id @default(uuid()) @db.Uuid
+  ruleId         String?       @map("rule_id") @db.Uuid
+  sensorId       String?       @map("sensor_id") @db.Uuid
+  nodeId         String?       @map("node_id") @db.Uuid
+  severity       AlertSeverity
+  status         AlertStatus   @default(ACTIVE)
+  title          String
+  message        String
+  triggeredAt    DateTime      @default(now()) @map("triggered_at") @db.Timestamptz(6)
+  resolvedAt     DateTime?     @map("resolved_at") @db.Timestamptz(6)
+  acknowledgedAt DateTime?     @map("acknowledged_at") @db.Timestamptz(6)
+  metadata       Json          @default("{}")
+  createdAt      DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  rule   AlertRule? @relation(fields: [ruleId], references: [id])
+  sensor Sensor?    @relation(fields: [sensorId], references: [id])
+  node   Node?      @relation(fields: [nodeId], references: [id])
+
+  @@index([status, severity])
+  @@index([triggeredAt])
+  @@map("alerts")
+}
+
+model Command {
+  id         String        @id @default(uuid()) @db.Uuid
+  messageId  String        @unique @map("message_id")
+  nodeId     String        @map("node_id") @db.Uuid
+  userId     String?       @map("user_id") @db.Uuid
+  command    String
+  parameters Json          @default("{}")
+  status     CommandStatus @default(PENDING)
+  sentAt     DateTime?     @map("sent_at") @db.Timestamptz(6)
+  timeoutAt  DateTime?     @map("timeout_at") @db.Timestamptz(6)
+  createdAt  DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  node    Node            @relation(fields: [nodeId], references: [id], onDelete: Cascade)
+  user    User?           @relation(fields: [userId], references: [id])
+  results CommandResult[]
+
+  @@index([nodeId, createdAt])
+  @@index([status])
+  @@map("commands")
+}
+
+model CommandResult {
+  id          String        @id @default(uuid()) @db.Uuid
+  commandId   String        @map("command_id") @db.Uuid
+  status      CommandStatus
+  response    Json          @default("{}")
+  error       String?
+  completedAt DateTime?     @map("completed_at") @db.Timestamptz(6)
+  createdAt   DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  command Command @relation(fields: [commandId], references: [id], onDelete: Cascade)
+
+  @@index([commandId])
+  @@map("command_results")
+}
+
+model DeviceEvent {
+  id        String   @id @default(uuid()) @db.Uuid
+  nodeId    String   @map("node_id") @db.Uuid
+  type      String
+  severity  String?
+  message   String
+  payload   Json     @default("{}")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  node Node @relation(fields: [nodeId], references: [id], onDelete: Cascade)
+
+  @@index([nodeId, createdAt])
+  @@map("device_events")
+}
+
+model AuditLog {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String?  @map("user_id") @db.Uuid
+  action    String
+  entity    String?
+  entityId  String?  @map("entity_id")
+  result    String
+  ipAddress String?  @map("ip_address")
+  metadata  Json     @default("{}")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  user User? @relation(fields: [userId], references: [id])
+
+  @@index([action, createdAt])
+  @@index([userId, createdAt])
+  @@map("audit_logs")
+}
+
+model SystemLog {
+  id            String   @id @default(uuid()) @db.Uuid
+  level         String
+  service       String
+  message       String
+  correlationId String?  @map("correlation_id")
+  metadata      Json     @default("{}")
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@index([level, createdAt])
+  @@map("system_logs")
+}
+
+model ApiKey {
+  id          String    @id @default(uuid()) @db.Uuid
+  name        String
+  keyHash     String    @map("key_hash")
+  permissions Json      @default("[]")
+  isActive    Boolean   @default(true) @map("is_active")
+  expiresAt   DateTime? @map("expires_at") @db.Timestamptz(6)
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  revokedAt   DateTime? @map("revoked_at") @db.Timestamptz(6)
+
+  @@index([isActive])
+  @@map("api_keys")
+}

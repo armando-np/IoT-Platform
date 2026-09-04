@@ -1,0 +1,11 @@
+services:
+  backend:
+    command: sh -c "npm install && npm run dev --workspace=@nexaiot/api"
+    volumes:
+      - .:/app
+    environment:
+      NODE_ENV: development
+
+  frontend:
+    environment:
+      NODE_ENV: development

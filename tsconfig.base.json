@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "strict": true,
+    "noImplicitOverride": true,
+    "noUncheckedIndexedAccess": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "baseUrl": ".",
+    "paths": {
+      "@nexaiot/shared": ["packages/shared/src"],
+      "@nexaiot/config": ["packages/config/src"],
+      "@nexaiot/mqtt": ["packages/mqtt/src"],
+      "@nexaiot/validation": ["packages/validation/src"]
+    }
+  }
+}

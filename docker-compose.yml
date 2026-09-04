@@ -1,0 +1,95 @@
+services:
+  postgres:
+    image: timescale/timescaledb:latest-pg16
+    container_name: nexaiot-postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-nexaiot}
+      POSTGRES_USER: ${POSTGRES_USER:-nexaiot}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-replace-with-local-password}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-nexaiot} -d ${POSTGRES_DB:-nexaiot}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - nexaiot
+
+  emqx:
+    image: emqx/emqx:5
+    container_name: nexaiot-emqx
+    restart: unless-stopped
+    environment:
+      EMQX_DASHBOARD__DEFAULT_USERNAME: ${EMQX_DASHBOARD_USER:-admin}
+      EMQX_DASHBOARD__DEFAULT_PASSWORD: ${EMQX_DASHBOARD_PASSWORD:-replace-with-dashboard-password}
+    ports:
+      - "1883:1883"
+      - "8883:8883"
+      - "8083:8083"
+      - "8084:8084"
+      - "18083:18083"
+    volumes:
+      - ./infra/emqx/base.hocon:/opt/emqx/etc/base.hocon:ro
+      - emqx-data:/opt/emqx/data
+      - emqx-log:/opt/emqx/log
+    healthcheck:
+      test: ["CMD", "/opt/emqx/bin/emqx", "ctl", "status"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+    networks:
+      - nexaiot
+
+  backend:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    container_name: nexaiot-api
+    env_file: .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      emqx:
+        condition: service_healthy
+    ports:
+      - "3001:3001"
+    networks:
+      - nexaiot
+
+  frontend:
+    image: node:20-alpine
+    container_name: nexaiot-web
+    working_dir: /app
+    command: sh -c "npm install && npm run dev --workspace=@nexaiot/web"
+    env_file: .env
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+    networks:
+      - nexaiot
+
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: nexaiot-nginx
+    depends_on:
+      - backend
+      - frontend
+    ports:
+      - "8080:80"
+    volumes:
+      - ./infra/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      - nexaiot
+
+volumes:
+  postgres-data:
+  emqx-data:
+  emqx-log:
+
+networks:
+  nexaiot:
+    driver: bridge

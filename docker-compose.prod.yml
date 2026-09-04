@@ -1,0 +1,11 @@
+services:
+  backend:
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+
+  frontend:
+    profiles: ["local-preview"]
+
+  nginx:
+    restart: unless-stopped

@@ -1,0 +1,48 @@
+# EMQX base configuration for NexaIoT.
+# Production TODO:
+# - Enable password authentication backed by PostgreSQL or EMQX built-in DB.
+# - Enable ACL rules per node credential.
+# - Replace test certificates and enable TLS verification.
+
+listeners.tcp.default {
+  bind = "0.0.0.0:1883"
+  max_connections = 1024000
+}
+
+listeners.ssl.default {
+  bind = "0.0.0.0:8883"
+  max_connections = 1024000
+  ssl_options {
+    cacertfile = "etc/certs/cacert.pem"
+    certfile = "etc/certs/cert.pem"
+    keyfile = "etc/certs/key.pem"
+    verify = verify_none
+    fail_if_no_peer_cert = false
+  }
+}
+
+listeners.ws.default {
+  bind = "0.0.0.0:8083"
+  max_connections = 1024000
+  websocket.mqtt_path = "/mqtt"
+}
+
+listeners.wss.default {
+  bind = "0.0.0.0:8084"
+  max_connections = 1024000
+  websocket.mqtt_path = "/mqtt"
+  ssl_options {
+    cacertfile = "etc/certs/cacert.pem"
+    certfile = "etc/certs/cert.pem"
+    keyfile = "etc/certs/key.pem"
+  }
+}
+
+mqtt {
+  max_packet_size = "1MB"
+  retain_available = true
+  wildcard_subscription = true
+  shared_subscription = true
+}
+
+log.console_handler.level = warning

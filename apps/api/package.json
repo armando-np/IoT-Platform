@@ -1,0 +1,62 @@
+{
+  "name": "@nexaiot/api",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "nest start --watch",
+    "start": "node dist/main.js",
+    "build": "nest build",
+    "lint": "eslint src prisma",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "jest --passWithNoTests",
+    "migration:create": "prisma migrate dev --create-only",
+    "migration:run": "prisma migrate deploy",
+    "migration:revert": "echo \"Prisma does not support automatic revert. Create a down migration script manually and test restore from backup.\"",
+    "seed": "tsx prisma/seed.ts",
+    "prisma:generate": "prisma generate"
+  },
+  "dependencies": {
+    "@nestjs/common": "^11.0.0",
+    "@nestjs/config": "^4.0.0",
+    "@nestjs/core": "^11.0.0",
+    "@nestjs/event-emitter": "^3.0.0",
+    "@nestjs/jwt": "^11.0.0",
+    "@nestjs/platform-express": "^11.0.0",
+    "@nestjs/platform-socket.io": "^11.0.0",
+    "@nestjs/swagger": "^11.0.0",
+    "@nestjs/throttler": "^6.0.0",
+    "@nestjs/websockets": "^11.0.0",
+    "@nexaiot/mqtt": "0.1.0",
+    "@nexaiot/shared": "0.1.0",
+    "@prisma/client": "^6.2.1",
+    "bcryptjs": "^2.4.3",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.1",
+    "helmet": "^8.0.0",
+    "mqtt": "^5.10.3",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.1",
+    "socket.io": "^4.8.1",
+    "uuid": "^11.0.5"
+  },
+  "devDependencies": {
+    "@nestjs/cli": "^11.0.0",
+    "@nestjs/schematics": "^11.0.0",
+    "@nestjs/testing": "^11.0.0",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/jest": "^29.5.14",
+    "@types/node": "^22.10.0",
+    "@types/uuid": "^10.0.0",
+    "eslint": "^9.18.0",
+    "jest": "^29.7.0",
+    "prisma": "^6.2.1",
+    "supertest": "^7.0.0",
+    "ts-jest": "^29.2.5",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  }
+}
