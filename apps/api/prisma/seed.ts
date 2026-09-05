@@ -114,7 +114,8 @@ async function main() {
     ['ENS160-AQI', 'AQI ENS160', 'aqi', 'AQI', 1, 5],
     ['AHT21-TEMP', 'Temperatura AHT21', 'temperature', '°C', -10, 60],
     ['AHT21-HUM', 'Humedad AHT21', 'humidity', '%', 0, 100],
-    ['DS18B20-TEMP', 'Temperatura externa DS18B20', 'temperature', '°C', -55, 125]
+    ['DS18B20-TEMP', 'Temperatura externa DS18B20', 'temperature', '°C', -55, 125],
+    ['PICO2W-TEMP', 'Temperatura interna Pico 2 W', 'temperature', '°C', -10, 90],
   ] as const;
 
   for (const [sensorId, name, type, unit, minValue, maxValue] of sensorSeed) {
