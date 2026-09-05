@@ -9,7 +9,7 @@ import { CorrelationIdInterceptor } from './common/interceptors/correlation-id.i
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
-  const port = Number(process.env.API_PORT ?? 3001);
+  const port = Number(process.env.PORT ?? 3001);
   const corsOrigins = (process.env.CORS_ORIGINS ?? 'http://localhost:3000')
     .split(',')
     .map((origin) => origin.trim())
